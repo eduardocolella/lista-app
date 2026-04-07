@@ -1,0 +1,203 @@
+// =============================
+// 📁 Estrutura do Projeto
+// =============================
+/*
+AppProva/
+ └── app/
+     ├── src/main/
+     │   ├── java/com/example/appprova/
+     │   │   ├── MainActivity.kt
+     │   │   └── ListaAdapter.kt
+     │   ├── res/layout/
+     │   │   ├── activity_main.xml
+     │   │   └── item_lista.xml
+     │   └── AndroidManifest.xml
+*/
+
+// =============================
+// 📄 MainActivity.kt
+// =============================
+package com.example.appprova
+
+import android.os.Bundle
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var input: EditText
+    private lateinit var btnAdd: Button
+    private lateinit var txtContador: TextView
+    private lateinit var recyclerView: RecyclerView
+
+    private val lista = mutableListOf<String>()
+    private lateinit var adapter: ListaAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        input = findViewById(R.id.input)
+        btnAdd = findViewById(R.id.btnAdd)
+        txtContador = findViewById(R.id.txtContador)
+        recyclerView = findViewById(R.id.recyclerView)
+
+        adapter = ListaAdapter(lista) { posicao ->
+            lista.removeAt(posicao)
+            atualizarContador()
+            adapter.notifyDataSetChanged()
+        }
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+        btnAdd.setOnClickListener {
+            val texto = input.text.toString()
+
+            if (texto.isNotEmpty()) {
+                lista.add(texto)
+                input.text.clear()
+                atualizarContador()
+                adapter.notifyDataSetChanged()
+            } else {
+                Toast.makeText(this, "Digite algo", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        atualizarContador()
+    }
+
+    private fun atualizarContador() {
+        txtContador.text = "Total: ${lista.size}"
+    }
+}
+
+// =============================
+// 📄 ListaAdapter.kt
+// =============================
+package com.example.appprova
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+
+class ListaAdapter(
+    private val lista: List<String>,
+    private val onDelete: (Int) -> Unit
+) : RecyclerView.Adapter<ListaAdapter.ViewHolder>() {
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val texto: TextView = view.findViewById(R.id.txtItem)
+        val btnRemover: Button = view.findViewById(R.id.btnRemover)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_lista, parent, false)
+        return ViewHolder(view)
+    }
+
+    override fun getItemCount(): Int = lista.size
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.texto.text = lista[position]
+
+        holder.btnRemover.setOnClickListener {
+            onDelete(position)
+        }
+    }
+}
+
+// =============================
+// 📄 activity_main.xml
+// =============================
+/*
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/input"
+        android:hint="Digite algo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnAdd"
+        android:text="Adicionar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/txtContador"
+        android:text="Total: 0"
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>
+*/
+
+// =============================
+// 📄 item_lista.xml
+// =============================
+/*
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:padding="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/txtItem"
+        android:layout_weight="1"
+        android:textSize="16sp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnRemover"
+        android:text="X"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
+*/
+
+// =============================
+// 📄 AndroidManifest.xml
+// =============================
+/*
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.appprova">
+
+    <application
+        android:allowBackup="true"
+        android:label="AppProva"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+</manifest>
+*/
